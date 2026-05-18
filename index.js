@@ -17,27 +17,42 @@ const uri = process.env.MONGODB_URI
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
 });
 
 async function run() {
-  try {
+    try {
 
-    await client.connect();
-    // all api here
-    
+        // await client.connect();
+        const db = client.db("doctor-appointment");
+        const doctorCollection = db.collection("doctor");
+        const bookingCollection = db.collection("booking");
+        // all api here
+
+        // doctor
+        app.get('/appointment', async (req, res) => {
+            const result = await doctorCollection.find().toArray()
+            res.json(result);
+        })
+
+        //fetch doctor by id
+        app.get('/appointment/:id', async (req, res) => {
+            const { id } = req.params;
+            const result = await doctorCollection.findOne({ _id: new ObjectId(id) })
+            res.json(result);
+        })
 
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
-  }
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
 }
 run().catch(console.dir);
 
