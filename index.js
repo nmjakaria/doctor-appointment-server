@@ -51,7 +51,7 @@ async function run() {
                 const result = await doctorCollection
                     .find()
                     .sort({ rating: -1 })
-                    .limit(4)
+                    .limit(3)
                     .toArray();
 
                 res.json(result);
