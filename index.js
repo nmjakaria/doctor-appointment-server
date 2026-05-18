@@ -4,7 +4,7 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const express = require("express")
 const dotenv = require('dotenv')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express()
 
@@ -45,6 +45,21 @@ async function run() {
             const result = await doctorCollection.findOne({ _id: new ObjectId(id) })
             res.json(result);
         })
+
+        app.get('/rated-doctor', async (req, res) => {
+            try {
+                const result = await doctorCollection
+                    .find()
+                    .sort({ rating: -1 })
+                    .limit(4)
+                    .toArray();
+
+                res.json(result);
+            } catch (error) {
+                console.error("Error fetching top doctors:", error);
+                res.status(500).json({ message: "Internal Server Error" });
+            }
+        });
 
 
         await client.db("admin").command({ ping: 1 });
