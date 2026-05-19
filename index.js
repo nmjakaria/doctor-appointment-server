@@ -45,7 +45,7 @@ async function run() {
             const result = await doctorCollection.findOne({ _id: new ObjectId(id) })
             res.json(result);
         })
-
+        //fetch doctor by rating
         app.get('/rated-doctor', async (req, res) => {
             try {
                 const result = await doctorCollection
@@ -61,6 +61,12 @@ async function run() {
             }
         });
 
+        //booking
+        app.post('/booking', async (req, res) => {
+            const bookingData = req.body;
+            const result = await bookingCollection.insertOne(bookingData);
+            res.json(result);
+        })
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
