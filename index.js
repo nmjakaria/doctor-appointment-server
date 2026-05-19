@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
 
-        // await client.connect();
+        await client.connect();
         const db = client.db("doctor-appointment");
         const doctorCollection = db.collection("doctor");
         const bookingCollection = db.collection("booking");
@@ -66,6 +66,12 @@ async function run() {
             const bookingData = req.body;
             const result = await bookingCollection.insertOne(bookingData);
             res.json(result);
+        })
+        //get booking data
+        app.get('/booking/:userId', async (req, res)=>{
+            const {userId} = req.params;
+            const resut = await bookingCollection.find({userId: userId}).toArray();
+            res.json(resut);
         })
 
         await client.db("admin").command({ ping: 1 });
