@@ -5,6 +5,7 @@ const express = require("express")
 const dotenv = require('dotenv')
 const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 
 const app = express()
 
@@ -24,6 +25,33 @@ const client = new MongoClient(uri, {
     }
 });
 
+const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`))
+
+const verifyToken = async (req, res, next) => {
+    const authHeader = req?.headers.authorization
+    if(!authHeader){
+        return res.status(401).json({
+            massage: "unauthorized"
+        });
+    }
+    const token = authHeader.split(" ")[1]
+    if(!token){
+        return res.status(401).json({
+            massage: "unauthorized"
+        });
+    }
+    try {
+        const {payload} = await jwtVerify(token, JWKS);
+        next()
+        
+    } catch (error) {
+        return res.status(403).json({
+            massage: "Forebidden"
+        })
+    }
+    
+}
+
 async function run() {
     try {
 
@@ -40,7 +68,7 @@ async function run() {
         })
 
         //fetch doctor by id
-        app.get('/appointment/:id', async (req, res) => {
+        app.get('/appointment/:id', verifyToken ,async (req, res) => {
             const { id } = req.params;
             const result = await doctorCollection.findOne({ _id: new ObjectId(id) })
             res.json(result);
@@ -80,10 +108,18 @@ async function run() {
             const updateData = req.body;
             const result = await bookingCollection.updateOne(
                 { _id: new ObjectId(id) },
-                {$set: updateData}
+                { $set: updateData }
             )
             res.json(result)
         })
+
+        //delete booking data
+        app.delete('/booking/:id', async (req, res) => {
+            const { id } = req.params;
+            const result = await bookingCollection.deleteOne({ _id: new ObjectId(id) })
+            res.json(result);
+        })
+
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -93,7 +129,6 @@ async function run() {
     }
 }
 run().catch(console.dir);
-
 
 
 
