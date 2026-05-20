@@ -51,7 +51,7 @@ const verifyToken = async (req, res, next) => {
     }
     
 }
-
+//main function
 async function run() {
     try {
 
@@ -90,7 +90,7 @@ async function run() {
         });
 
         //booking
-        app.post('/booking', async (req, res) => {
+        app.post('/booking', verifyToken, async (req, res) => {
             const bookingData = req.body;
             const result = await bookingCollection.insertOne(bookingData);
             res.json(result);
