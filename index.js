@@ -96,14 +96,14 @@ async function run() {
             res.json(result);
         })
         //get booking data
-        app.get('/booking/:userId', async (req, res) => {
+        app.get('/booking/:userId', verifyToken, async (req, res) => {
             const { userId } = req.params;
             const resut = await bookingCollection.find({ userId: userId }).toArray();
             res.json(resut);
         })
 
         //booking data update
-        app.patch('/booking/:id', async (req, res) => {
+        app.patch('/booking/:id', verifyToken, async (req, res) => {
             const { id } = req.params;
             const updateData = req.body;
             const result = await bookingCollection.updateOne(
@@ -114,7 +114,7 @@ async function run() {
         })
 
         //delete booking data
-        app.delete('/booking/:id', async (req, res) => {
+        app.delete('/booking/:id', verifyToken, async (req, res) => {
             const { id } = req.params;
             const result = await bookingCollection.deleteOne({ _id: new ObjectId(id) })
             res.json(result);
